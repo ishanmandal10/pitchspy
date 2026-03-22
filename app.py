@@ -41,11 +41,12 @@ h1, h2, h3 { font-family: 'Syne', sans-serif !important; font-weight: 800; }
 .stTextInput > div > div > input { background: #111110 !important; border: 1px solid #2a2a28 !important; border-radius: 8px !important; color: #e8e8e0 !important; font-family: 'DM Mono', monospace !important; font-size: 0.9rem !important; padding: 0.75rem 1rem !important; }
 .stTextInput > div > div > input:focus { border-color: #c8f135 !important; box-shadow: 0 0 0 2px rgba(200,241,53,0.15) !important; }
 .stTextArea > div > div > textarea { background: #111110 !important; border: 1px solid #2a2a28 !important; border-radius: 8px !important; color: #e8e8e0 !important; font-family: 'DM Mono', monospace !important; font-size: 0.9rem !important; }
-/* Analyze button - accent green */
+/* All buttons default - accent green */
 .stButton > button { background: #c8f135 !important; color: #0a0a0a !important; font-family: 'Syne', sans-serif !important; font-weight: 700 !important; font-size: 0.95rem !important; border: none !important; border-radius: 8px !important; padding: 0.65rem 2rem !important; letter-spacing: 0.03em !important; width: 100% !important; }
 .stButton > button:hover { opacity: 0.85 !important; }
-/* About and Contact buttons - muted green */
-[data-testid="stButton"]:nth-child(1) button, [data-testid="stButton"]:nth-child(2) button { background: #2d4a1e !important; color: #c8f135 !important; font-family: 'DM Mono', monospace !important; font-weight: 500 !important; font-size: 0.75rem !important; border: 1px solid #3d6a2e !important; border-radius: 6px !important; padding: 0.3rem 0.9rem !important; width: auto !important; letter-spacing: 0.05em !important; }
+/* About and Contact - muted green small buttons */
+[data-testid="stButton"] button[data-testid="baseButton-secondary"],
+button[kind="secondary"] { background: #2d4a1e !important; color: #c8f135 !important; font-family: 'DM Mono', monospace !important; font-weight: 500 !important; font-size: 0.75rem !important; border: 1px solid #3d6a2e !important; border-radius: 6px !important; padding: 0.3rem 0.9rem !important; width: auto !important; letter-spacing: 0.05em !important; }
 .stSpinner > div { border-top-color: #c8f135 !important; }
 footer { display: none; }
 #MainMenu { display: none; }
@@ -365,10 +366,10 @@ with col_title:
     st.markdown('<div class="hero-sub">Competitor intelligence · in 10 seconds</div>', unsafe_allow_html=True)
 with col_btns:
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("About", key="about_btn"):
+    if st.button("About", key="about_btn", type="secondary"):
         st.session_state.show_about = not st.session_state.show_about
         st.session_state.show_contact = False
-    if st.button("Contact", key="contact_btn"):
+    if st.button("Contact", key="contact_btn", type="secondary"):
         st.session_state.show_contact = not st.session_state.show_contact
         st.session_state.show_about = False
 
