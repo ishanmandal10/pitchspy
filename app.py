@@ -56,7 +56,7 @@ footer { display: none; }
 # FIX 1: Validate API key on startup so we catch it early
 # If the key is missing or still default, we warn the user immediately
 # instead of crashing later when they try to analyze something
-GROQ_API_KEY = "your_groq_key_here"
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 HISTORY_FILE = "history.json"
 
 def is_valid_api_key(key):
