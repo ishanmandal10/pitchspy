@@ -41,12 +41,12 @@ h1, h2, h3 { font-family: 'Syne', sans-serif !important; font-weight: 800; }
 .stTextInput > div > div > input { background: #111110 !important; border: 1px solid #2a2a28 !important; border-radius: 8px !important; color: #e8e8e0 !important; font-family: 'DM Mono', monospace !important; font-size: 0.9rem !important; padding: 0.75rem 1rem !important; }
 .stTextInput > div > div > input:focus { border-color: #c8f135 !important; box-shadow: 0 0 0 2px rgba(200,241,53,0.15) !important; }
 .stTextArea > div > div > textarea { background: #111110 !important; border: 1px solid #2a2a28 !important; border-radius: 8px !important; color: #e8e8e0 !important; font-family: 'DM Mono', monospace !important; font-size: 0.9rem !important; }
-/* All buttons default - accent green */
-.stButton > button { background: #c8f135 !important; color: #0a0a0a !important; font-family: 'Syne', sans-serif !important; font-weight: 700 !important; font-size: 0.95rem !important; border: none !important; border-radius: 8px !important; padding: 0.65rem 2rem !important; letter-spacing: 0.03em !important; width: 100% !important; }
-.stButton > button:hover { opacity: 0.85 !important; }
-/* About and Contact - muted green small buttons */
-[data-testid="stButton"] button[data-testid="baseButton-secondary"],
-button[kind="secondary"] { background: #2d4a1e !important; color: #c8f135 !important; font-family: 'DM Mono', monospace !important; font-weight: 500 !important; font-size: 0.75rem !important; border: 1px solid #3d6a2e !important; border-radius: 6px !important; padding: 0.3rem 0.9rem !important; width: auto !important; letter-spacing: 0.05em !important; }
+/* All primary buttons - yellow green */
+.stButton > button[kind="primary"] { background: #c8f135 !important; color: #0a0a0a !important; font-family: 'Syne', sans-serif !important; font-weight: 700 !important; font-size: 0.95rem !important; border: none !important; border-radius: 8px !important; padding: 0.65rem 2rem !important; letter-spacing: 0.03em !important; width: 100% !important; }
+.stButton > button[kind="primary"]:hover { opacity: 0.85 !important; }
+/* About and Contact - small muted green */
+.stButton > button[kind="secondary"] { background: #2d4a1e !important; color: #c8f135 !important; font-family: 'DM Mono', monospace !important; font-weight: 500 !important; font-size: 0.72rem !important; border: 1px solid #3d6a2e !important; border-radius: 6px !important; padding: 0.25rem 0.8rem !important; width: auto !important; letter-spacing: 0.05em !important; display: inline-block !important; }
+.stButton > button[kind="secondary"]:hover { background: #3d6a2e !important; }
 .stSpinner > div { border-top-color: #c8f135 !important; }
 footer { display: none; }
 #MainMenu { display: none; }
@@ -350,11 +350,12 @@ if "show_about" not in st.session_state:
 if "show_contact" not in st.session_state:
     st.session_state.show_contact = False
 
-def save_to_history(url, data):
+def save_to_history(label, data, entry_type="competitor"):
     # Now saves to session state only — private to each user's browser tab
     st.session_state.history.insert(0, {
-        "url": url,
+        "label": label,
         "data": data,
+        "type": entry_type,
         "time": datetime.now().strftime("%d %b %Y, %H:%M")
     })
     st.session_state.history = st.session_state.history[:20]
@@ -366,12 +367,15 @@ with col_title:
     st.markdown('<div class="hero-sub">Competitor intelligence · in 10 seconds</div>', unsafe_allow_html=True)
 with col_btns:
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("About", key="about_btn", type="secondary"):
-        st.session_state.show_about = not st.session_state.show_about
-        st.session_state.show_contact = False
-    if st.button("Contact", key="contact_btn", type="secondary"):
-        st.session_state.show_contact = not st.session_state.show_contact
-        st.session_state.show_about = False
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        if st.button("About", key="about_btn", type="secondary"):
+            st.session_state.show_about = not st.session_state.show_about
+            st.session_state.show_contact = False
+    with btn_col2:
+        if st.button("Contact", key="contact_btn", type="secondary"):
+            st.session_state.show_contact = not st.session_state.show_contact
+            st.session_state.show_about = False
 
 if st.session_state.show_about:
     st.markdown("""
@@ -437,7 +441,7 @@ with tab1:
                     data = analyze(content)
                 if data and "_error" not in data:
                     st.session_state.analyses.append({"url": url, "data": data})
-                    save_to_history(url, data)
+                    save_to_history(url, data, "competitor")
                 elif data and "_error" in data:
                     st.markdown(f'<div class="error-box">⚠️ {data["_error"]}</div>', unsafe_allow_html=True)
 
@@ -466,6 +470,7 @@ with tab1:
                     answer = ask_followup(question, st.session_state.analyses)
                 st.session_state.chat_history.append({"role": "user", "content": question})
                 st.session_state.chat_history.append({"role": "ai", "content": answer})
+                save_to_history(question[:60], {"question": question, "answer": answer}, "chat")
                 st.rerun()
 
 with tab2:
@@ -487,6 +492,7 @@ with tab2:
     if st.session_state.demand:
         st.markdown('<hr class="divider">', unsafe_allow_html=True)
         render_demand(st.session_state.demand)
+        save_to_history(idea_input[:60], st.session_state.demand, "demand")
 
 with tab3:
     startup_desc = st.text_area(
@@ -513,7 +519,25 @@ with tab4:
     if not history:
         st.markdown('<div style="color:#5a5a52; margin-top:1rem;">No analyses yet in this session. Run your first one!</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div style="color:#5a5a52; font-size:0.8rem; margin-bottom:1rem;">LAST {len(history)} ANALYSES THIS SESSION</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="color:#5a5a52; font-size:0.8rem; margin-bottom:1rem;">LAST {len(history)} ENTRIES THIS SESSION</div>', unsafe_allow_html=True)
         for item in history:
-            with st.expander(f"🔗 {item['url']}  ·  {item['time']}"):
-                render_result(item["url"], item["data"])
+            entry_type = item.get("type", "competitor")
+            label = item.get("label", item.get("url", "—"))
+            if entry_type == "competitor":
+                icon = "🔗"
+            elif entry_type == "demand":
+                icon = "🔥"
+            elif entry_type == "pitch":
+                icon = "📊"
+            else:
+                icon = "💬"
+            with st.expander(f"{icon} {label}  ·  {item['time']}"):
+                if entry_type == "competitor":
+                    render_result(label, item["data"])
+                elif entry_type == "demand":
+                    render_demand(item["data"])
+                elif entry_type == "pitch":
+                    render_pitch_slide(item["data"])
+                elif entry_type == "chat":
+                    st.markdown(f'<div class="card"><div class="card-label">Question</div><div class="card-content">{item["data"]["question"]}</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="card"><div class="card-label">Answer</div><div class="card-content">{item["data"]["answer"]}</div></div>', unsafe_allow_html=True)
