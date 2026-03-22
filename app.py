@@ -41,9 +41,11 @@ h1, h2, h3 { font-family: 'Syne', sans-serif !important; font-weight: 800; }
 .stTextInput > div > div > input { background: #111110 !important; border: 1px solid #2a2a28 !important; border-radius: 8px !important; color: #e8e8e0 !important; font-family: 'DM Mono', monospace !important; font-size: 0.9rem !important; padding: 0.75rem 1rem !important; }
 .stTextInput > div > div > input:focus { border-color: #c8f135 !important; box-shadow: 0 0 0 2px rgba(200,241,53,0.15) !important; }
 .stTextArea > div > div > textarea { background: #111110 !important; border: 1px solid #2a2a28 !important; border-radius: 8px !important; color: #e8e8e0 !important; font-family: 'DM Mono', monospace !important; font-size: 0.9rem !important; }
+/* Analyze button - accent green */
 .stButton > button { background: #c8f135 !important; color: #0a0a0a !important; font-family: 'Syne', sans-serif !important; font-weight: 700 !important; font-size: 0.95rem !important; border: none !important; border-radius: 8px !important; padding: 0.65rem 2rem !important; letter-spacing: 0.03em !important; width: 100% !important; }
 .stButton > button:hover { opacity: 0.85 !important; }
-[data-testid='stButton'] button[kind='secondary'] { background: transparent !important; color: #5a5a52 !important; font-family: 'DM Mono', monospace !important; font-size: 0.72rem !important; border: 1px solid #2a2a28 !important; border-radius: 6px !important; padding: 0.3rem 0.8rem !important; width: auto !important; }
+/* About and Contact buttons - muted green */
+[data-testid="stButton"]:nth-child(1) button, [data-testid="stButton"]:nth-child(2) button { background: #2d4a1e !important; color: #c8f135 !important; font-family: 'DM Mono', monospace !important; font-weight: 500 !important; font-size: 0.75rem !important; border: 1px solid #3d6a2e !important; border-radius: 6px !important; padding: 0.3rem 0.9rem !important; width: auto !important; letter-spacing: 0.05em !important; }
 .stSpinner > div { border-top-color: #c8f135 !important; }
 footer { display: none; }
 #MainMenu { display: none; }
@@ -54,7 +56,7 @@ footer { display: none; }
 # FIX 1: Validate API key on startup so we catch it early
 # If the key is missing or still default, we warn the user immediately
 # instead of crashing later when they try to analyze something
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+GROQ_API_KEY = "your_groq_key_here"
 HISTORY_FILE = "history.json"
 
 def is_valid_api_key(key):
@@ -422,6 +424,10 @@ with tab1:
             st.session_state.pitch = None
             for url in urls:
                 url = normalize_url(url)  # FIX 4: auto-add https://
+                # Check if it looks like a real URL
+                if "." not in url or len(url) < 8:
+                    st.markdown(f'<div class="error-box">⚠️ "{url}" does not look like a valid website URL. Try something like https://notion.so</div>', unsafe_allow_html=True)
+                    continue
                 with st.spinner(f"Analyzing {url}..."):
                     content = scrape_website(url)
                     if content.startswith("ERROR"):
